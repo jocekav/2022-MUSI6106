@@ -16,7 +16,8 @@ public:
         m_iBuffLength(iBufferLengthInSamples),
         m_iReadIdx(0),
         m_iWriteIdx(0),
-        m_ptBuff(0)
+        m_ptBuff(0),
+        m_fullFlag(false)
     {
         assert(iBufferLengthInSamples > 0);
 
@@ -40,21 +41,26 @@ public:
     */
     void putPostInc (T tNewValue)
     {
-        // Check if full
-        full = abs(m_iWriteIdx - m_iReadIdx) + 1 == m_iBuffLength;
+
+        put(tNewValue);
         
-        if (full) {
-            // do something 
-        } else {
-            put(tNewValue);
+        // if full, increment the read index to overwrite old values
+        if (m_fullFlag) {
+            m_iReadIdx++;
+            if (m_iReadIdx == m_iBuffLength) {
+                m_iReadIdx = 0;
+            }
         }
-        
-        //increment write index
+
+        // increment write index
         m_iWriteIdx++;
 
         // check if out of bounds -> wrap around
         if (m_iWriteIdx == m_iBuffLength) {
             m_iWriteIdx = 0;
+        }
+        // check if full
+        m_fullFlag = m_iReadIdx == m_iWriteIdx;
     }
 
     /*! add a new value of type T to write index
@@ -71,6 +77,11 @@ public:
     */
     T getPostInc()
     {
+        // check if empty and return error
+        if (!m_fullFlag && m_iReadIdx == m_iWriteIdx) {
+            return -1;
+        }
+
         T val = get();
 
         // increment read index
@@ -144,16 +155,22 @@ public:
     int getNumValuesInBuffer() const
     {
 
-        numValues = abs(m_iWriteIdx - m_iReadIdx) + 1;
-        if (full) {
-            return getLength();
-        } 
+        diff = m_writeIdx - m_ReadIdx;
 
-        if (m_iWriteIdx > m_iReadIdx) {
-            return m_iWriteIdx - m
+        // when write is ahead of read
+        if (diff > 0) {
+            return diff
+        } // when read is ahead of write
+        else if (diff < 0) {
+            return (m_iBuffLength + diff)
         }
-        
-        return ;
+        else {
+            if (m_fullFlag) {
+                return m_iBuffLength
+            } else {
+                return 0;
+            }
+        }
     }
 
     /*! returns the length of the internal buffer
@@ -161,8 +178,9 @@ public:
     */
     int getLength() const
     {
-        return -1;
+        return m_iBuffLength;
     }
+    
 private:
     CRingBuffer();
     CRingBuffer(const CRingBuffer& that);
@@ -174,5 +192,6 @@ private:
     int m_iReadIdx;
     int m_iWriteIdx;
     float[]* m_ptBuff(0);
+    bool m_fullFlag;
 };
-#endif // __RingBuffer_hdr__
+#endif // __RingBuffer_hdr_
