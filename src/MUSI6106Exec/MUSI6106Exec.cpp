@@ -2,9 +2,9 @@
 #include <iostream>
 #include <ctime>
 
-#include "MUSI6106Config.h"
+// #include "/Users/jocekav/Documents/GitHub/2022-MUSI6106/src/MUSI6106Config.h"
 
-#include "RingBuffer.h"
+#include "/Users/jocekav/Documents/GitHub/2022-MUSI6106/src/inc/RingBuffer.h"
 
 using std::cout;
 using std::endl;

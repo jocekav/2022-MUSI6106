@@ -90,6 +90,7 @@ public:
         // check if out of bounds -> wrap around
         if (m_iReadIdx == m_iBuffLength) {
             m_iReadIdx = 0;
+        }
 
         return val;
     }
@@ -155,19 +156,21 @@ public:
     int getNumValuesInBuffer() const
     {
 
-        diff = m_writeIdx - m_ReadIdx;
+        int diff = m_iWriteIdx - m_iReadIdx;
 
         // when write is ahead of read
         if (diff > 0) {
-            return diff
+            return diff;
         } // when read is ahead of write
         else if (diff < 0) {
-            return (m_iBuffLength + diff)
+            return (m_iBuffLength + diff);
         }
         else {
+            // return buffer length if full
             if (m_fullFlag) {
-                return m_iBuffLength
+                return m_iBuffLength;
             } else {
+            // return 0 if empty
                 return 0;
             }
         }
@@ -180,7 +183,7 @@ public:
     {
         return m_iBuffLength;
     }
-    
+
 private:
     CRingBuffer();
     CRingBuffer(const CRingBuffer& that);
@@ -191,7 +194,7 @@ private:
 
     int m_iReadIdx;
     int m_iWriteIdx;
-    float[]* m_ptBuff(0);
+    float* m_ptBuff;
     bool m_fullFlag;
 };
 #endif // __RingBuffer_hdr_
