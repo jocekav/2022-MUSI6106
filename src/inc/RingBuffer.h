@@ -130,7 +130,9 @@ public:
     */
     void setWriteIdx(int iNewWriteIdx)
     {
-        m_iWriteIdx = iNewWriteIdx;
+        if (iNewWriteIdx >= 0 && iNewWriteIdx < m_iBuffLength) {
+            m_iWriteIdx = iNewWriteIdx;
+        }
     }
 
     /*! return the current index for reading/get
@@ -147,7 +149,9 @@ public:
     */
     void setReadIdx(int iNewReadIdx)
     {
-        m_iReadIdx = iNewReadIdx;
+        if (iNewReadIdx >= 0 && iNewReadIdx < m_iBuffLength) {
+            m_iReadIdx = iNewReadIdx;
+        }
     }
 
     /*! returns the number of values currently buffered (note: 0 could also mean the buffer is full!)
