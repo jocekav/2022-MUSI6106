@@ -101,10 +101,18 @@ protected:
     virtual ~CCombFilterIf ();
 
 private:
-    bool            m_bIsInitialized;   //!< internal bool to check whether the init function has been called
+    // virtual Error_t processFIR(float** ppfInputBuffer, float** ppfOutputBuffer, int iNumberOfFrames);
+    // virtual Error_t processIIR(float** ppfInputBuffer, float** ppfOutputBuffer, int iNumberOfFrames);
+
     CCombFilterBase *m_pCCombFilter;    //!< handle of the comb filter
 
+    bool            m_bIsInitialized;   //!< internal bool to check whether the init function has been called
     float           m_fSampleRate;      //!< audio sample rate in Hz
+    CombFilterType_t m_eFilterType;
+    int             m_iNumChannels;
+    float           m_fMaxDelayLengthInS;
+    float           m_fGain;
+
 };
 
 #endif // #if !defined(__CombFilterIf_hdr__)
