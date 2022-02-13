@@ -15,8 +15,22 @@
 CCombFilterBase::CCombFilterBase():
     m_ppRingBuffer(0),
     m_iDelayTimeSamples(1),
-    m_fGain(0.5f)
+    m_fGain(1)
 {
+}
+
+CCombFilterBase::CCombFilterBase(int iMaxDelaySamples, int iNumChannels)
+{
+    m_fGain = 1;
+    
+    m_iMaxDelaySamples = iMaxDelaySamples;
+    m_iNumChannels = iNumChannels;
+
+    m_ppRingBuffer = new CRingBuffer<float>* [iNumChannels];
+    for (int i = 0; i < iNumChannels; i++)
+    {
+        m_ppRingBuffer[i] = new CRingBuffer<float>(iMaxDelaySamples);
+    }
 }
 
 CCombFilterBase::~CCombFilterBase()
@@ -57,18 +71,18 @@ float CCombFilterBase::getParam(FilterParam_t eParam)
     }
 }
 
-Error_t CCombFilterBase::init(int iMaxDelaySamples, int iNumChannels)
-{
-    m_iMaxDelaySamples = iMaxDelaySamples;
-    m_iNumChannels = iNumChannels;
-    
-    m_ppRingBuffer = new CRingBuffer<float>* [iNumChannels];
-    for (int i = 0; i < iNumChannels; i++)
-    {
-        m_ppRingBuffer[i] = new CRingBuffer<float>(iMaxDelaySamples);
-    }
-    
-}
+//Error_t CCombFilterBase::init(int iMaxDelaySamples, int iNumChannels)
+//{
+//    m_iMaxDelaySamples = iMaxDelaySamples;
+//    m_iNumChannels = iNumChannels;
+//
+//    m_ppRingBuffer = new CRingBuffer<float>* [iNumChannels];
+//    for (int i = 0; i < iNumChannels; i++)
+//    {
+//        m_ppRingBuffer[i] = new CRingBuffer<float>(iMaxDelaySamples);
+//    }
+//
+//}
 
 Error_t CCombFilterFIR::process(float **ppfInputBuffer, float **ppfOutputBuffer, int iNumberOfFrames) 
 {

@@ -29,20 +29,47 @@ int main(int argc, char* argv[])
     CAudioFileIf *phAudioFile = 0;
     std::fstream hOutputFile;
     CAudioFileIf::FileSpec_t stFileSpec;
+    
+    CCombFilterIf           *phCombFilter = 0;
+    
+    CCombFilterIf::CombFilterType_t combFilterType;
+    
+    // params for filter
+    float                   fDelayInSec = 0;
+    float                   fGain = 1;
+    float                   fMaxDelayLengthInS = 1;
 
     showClInfo();
 
     //////////////////////////////////////////////////////////////////////////////
     // parse command line arguments
-    if (argc < 2)
+    // arguments [input path, filter type, delay time, gain]
+    
+    if (argc < 6 && argc != 1)
     {
-        cout << "Missing audio input path!";
+        cout << "Missing arguments!";
         return -1;
     }
     else
     {
         sInputFilePath = argv[1];
-        sOutputFilePath = sInputFilePath + ".txt";
+        sOutputFilePath = sInputFilePath + "_combFilter.wav";
+        
+        if (strcmp(argv[2], "FIR"))
+        {
+            combFilterType = CCombFilterIf::kCombFIR;
+        } else if (strcmp(argv[2], "IIR"))
+        {
+            combFilterType = CCombFilterIf::kCombIIR;
+        } else
+        {
+            cout << "Incorrect filters - FIR or IIR";
+            return -1;
+        }
+        
+        fDelayInSec = atof(argv[3]);
+        fGain = atof(argv[4]);
+        
     }
 
     //////////////////////////////////////////////////////////////////////////////
