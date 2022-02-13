@@ -101,8 +101,6 @@ protected:
     virtual ~CCombFilterIf ();
 
 private:
-    // virtual Error_t processFIR(float** ppfInputBuffer, float** ppfOutputBuffer, int iNumberOfFrames);
-    // virtual Error_t processIIR(float** ppfInputBuffer, float** ppfOutputBuffer, int iNumberOfFrames);
 
     CCombFilterBase *m_pCCombFilter;    //!< handle of the comb filter
 
