@@ -57,7 +57,8 @@ const char*  CCombFilterIf::getBuildDate ()
 
 Error_t CCombFilterIf::create (CCombFilterIf*& pCCombFilter)
 {
-    pCCombFilter = new CCombFilterBase();
+//    pCCombFilter = new CCombFilterBase();
+    pCCombFilter = new CCombFilterIf();
 
     return Error_t::kNoError;
 }
@@ -84,15 +85,14 @@ Error_t CCombFilterIf::init (CombFilterType_t eFilterType, float fMaxDelayLength
 
     int iDelaySamples = fMaxDelayLengthInS * fSampleRateInHz;
     
-    m_pCCombFilter -> CCombFilterBase::init(iDelaySamples, iNumChannels);
     
     switch(eFilterType)
     {
         case kCombFIR:
-            m_pCCombFilter = static_cast<CCombFilterBase*> (new CCombFilterFIR (iDelaySamples, iNumChannels));
+            m_pCCombFilter = new CCombFilterFIR (iDelaySamples, iNumChannels);
             break;
         case kCombIIR:
-            m_pCCombFilter = static_cast<CCombFilterBase*> (new CCombFilterIIR (iDelaySamples, iNumChannels));
+            m_pCCombFilter = new CCombFilterIIR (iDelaySamples, iNumChannels);
             break;
     }
 
