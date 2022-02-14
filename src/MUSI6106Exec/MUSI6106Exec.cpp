@@ -14,6 +14,7 @@ using std::endl;
 // local function declarations
 void    showClInfo ();
 int     filterProcess(std::string sInputFilePath, std::string sOutputFilePath, CCombFilterIf::CombFilterType_t combFilterType, float fDelayInSec, float fGain, int blockSize);
+void    test1();
 
 /////////////////////////////////////////////////////////////////////////////////
 // main function
@@ -47,8 +48,14 @@ int main(int argc, char* argv[])
     //////////////////////////////////////////////////////////////////////////////
     // parse command line arguments
     // arguments [input path, filter type, delay time, gain]
+    if (argc == 1)
+    {
+        cout << "Test 1";
+        test1();
         
-    if (argc < 5 && argc != 1)
+        return 0;
+        
+    } else if (argc < 5 && argc != 1)
     {
         cout << "Missing arguments!";
         return -1;
@@ -72,9 +79,10 @@ int main(int argc, char* argv[])
         
         fDelayInSec = atof(argv[3]);
         fGain = atof(argv[4]);
+        
+        // run filtering
+        return filterProcess(sInputFilePath, sOutputFilePath, combFilterType, fDelayInSec, fGain, kBlockSize);
     }
-    // run filtering
-    return filterProcess(sInputFilePath, sOutputFilePath, combFilterType, fDelayInSec, fGain, kBlockSize);
 }
 
 int filterProcess(std::string sInputFilePath, std::string sOutputFilePath, CCombFilterIf::CombFilterType_t combFilterType, float fDelayInSec, float fGain, int blockSize)
@@ -203,7 +211,19 @@ int filterProcess(std::string sInputFilePath, std::string sOutputFilePath, CComb
 
 void test1()
 {
+    std::string sInputFilePath = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/sine440.wav";
+                
+    std::string sOutputFilePath = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/sine440_test1.wav";
+
+    int blockSize = 1024;
     
+    CCombFilterIf::CombFilterType_t combFilterType = CCombFilterIf::CombFilterType_t::kCombFIR;
+    
+    // params for filter
+    float                   fDelayInSec = 1;
+    float                   fGain = -1;
+    
+    filterProcess(sInputFilePath, sOutputFilePath, combFilterType, fDelayInSec, fGain, blockSize);
 }
 
 void     showClInfo()
