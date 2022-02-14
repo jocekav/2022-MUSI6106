@@ -15,6 +15,7 @@ using std::endl;
 void    showClInfo ();
 int     filterProcess(std::string sInputFilePath, std::string sOutputFilePath, CCombFilterIf::CombFilterType_t combFilterType, float fDelayInSec, float fGain, int blockSize);
 void    test1();
+void    test2();
 
 /////////////////////////////////////////////////////////////////////////////////
 // main function
@@ -50,8 +51,11 @@ int main(int argc, char* argv[])
     // arguments [input path, filter type, delay time, gain]
     if (argc == 1)
     {
-        cout << "Test 1";
+        cout << "Test 1" << endl;
         test1();
+        
+        cout << "Test 2" << endl;
+        test2();
         
         return 0;
         
@@ -103,9 +107,7 @@ int filterProcess(std::string sInputFilePath, std::string sOutputFilePath, CComb
     
     // params for filter
     float                   fMaxDelayInS = 1;
-
-    showClInfo();
-
+    
     //////////////////////////////////////////////////////////////////////////////
     // open the input wave file
     CAudioFileIf::create(phAudioFile);
@@ -160,8 +162,6 @@ int filterProcess(std::string sInputFilePath, std::string sOutputFilePath, CComb
         CAudioFileIf::destroy(phAudioFile);
         return -1;
     }
-    
-    cout << "memory allocated";
 
     time = clock();
 
@@ -181,10 +181,9 @@ int filterProcess(std::string sInputFilePath, std::string sOutputFilePath, CComb
         // write to file
         phAudioOutputFile->writeData(ppfAudioOutputData, iNumFrames);
         
-        cout << "\r" << "reading and writing";
     }
 
-    cout << "\nreading/writing done in: \t" << (clock() - time) * 1.F / CLOCKS_PER_SEC << " seconds." << endl;
+    cout << (clock() - time) * 1.F / CLOCKS_PER_SEC << " seconds." << endl;
 
     //////////////////////////////////////////////////////////////////////////////
     // clean-up (close files and free memory)
@@ -222,6 +221,77 @@ void test1()
     // params for filter
     float                   fDelayInSec = 1;
     float                   fGain = -1;
+    
+    filterProcess(sInputFilePath, sOutputFilePath, combFilterType, fDelayInSec, fGain, blockSize);
+    
+    // Check Output - should be 0
+    CAudioFileIf *phAudioOutputFile = 0;
+    CAudioFileIf::FileSpec_t stFileSpec;
+    
+    float **ppfAudioOutputData = 0;
+    
+    phAudioOutputFile -> create(phAudioOutputFile);
+    phAudioOutputFile -> openFile(sOutputFilePath, CAudioFileIf::kFileRead);
+
+    phAudioOutputFile -> getFileSpec(stFileSpec);
+
+    ppfAudioOutputData = new float* [stFileSpec.iNumChannels];
+    
+    // allocate array
+    for (int i = 0; i < stFileSpec.iNumChannels; i++)
+    {
+        ppfAudioOutputData[i] = new float[blockSize];
+    }
+
+    while (!phAudioOutputFile -> isEof())
+    {
+        long long iNumFrames = blockSize; //number of frames to read at a time
+        //read in 1024 frames
+        //store in ppfOutput
+        phAudioOutputFile -> readData(ppfAudioOutputData, iNumFrames);
+        
+        // check if output is 0
+        for (int i = 0; i < stFileSpec.iNumChannels; i++) //compare the two arrays
+        {
+            for (int j = 0; j < iNumFrames; j++)
+            {
+                if (ppfAudioOutputData[i][j] != 0)
+                {
+                    cout << "Test 1 Failed" << endl;
+                    return;
+                }
+            }
+        }
+    }
+        cout << "Test 1 Passed" << endl;
+
+    // clean-up (close files and free memory)
+    CAudioFileIf::destroy(phAudioOutputFile);
+
+    for (int i = 0; i < stFileSpec.iNumChannels; i++)
+    {
+        delete[] ppfAudioOutputData[i];
+    }
+    
+    delete[] ppfAudioOutputData;
+    
+    ppfAudioOutputData = 0;
+
+}
+
+void test2()
+{
+    std::string sInputFilePath = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/sine440.wav";
+                
+    std::string sOutputFilePath = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/sine440_test2.wav";
+
+    int blockSize = 1024;
+    
+    CCombFilterIf::CombFilterType_t combFilterType = CCombFilterIf::CombFilterType_t::kCombIIR;
+    
+    // params for filter
+    float                   fDelayInSec = 0.5;
+    float                   fGain = 1;
     
     filterProcess(sInputFilePath, sOutputFilePath, combFilterType, fDelayInSec, fGain, blockSize);
 }
