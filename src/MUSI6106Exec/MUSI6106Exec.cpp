@@ -16,6 +16,7 @@ void    showClInfo ();
 int     filterProcess(std::string sInputFilePath, std::string sOutputFilePath, CCombFilterIf::CombFilterType_t combFilterType, float fDelayInSec, float fGain, int blockSize);
 void    test1();
 void    test2();
+void    test3(CCombFilterIf::CombFilterType_t combFilterType);
 
 /////////////////////////////////////////////////////////////////////////////////
 // main function
@@ -56,6 +57,12 @@ int main(int argc, char* argv[])
         
         cout << "Test 2" << endl;
         test2();
+        
+        cout << "Test 3 - FIR" << endl;
+        test3(CCombFilterIf::CombFilterType_t::kCombFIR);
+        
+        cout << "Test 3 - IIR" << endl;
+        test3(CCombFilterIf::CombFilterType_t::kCombIIR);
         
         return 0;
         
@@ -362,6 +369,93 @@ void test2()
     
     ppfAudioData = 0;
     ppfAudioOutputData = 0;
+}
+
+void test3(CCombFilterIf::CombFilterType_t combFilterType)
+{
+    std::string sInputFilePath = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/sine440.wav";
+                
+    std::string sOutputFilePath1 = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/sine440_test3_1.wav";
+    std::string sOutputFilePath2 = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/sine440_test3_2.wav";
+    
+    // params for filter
+    float                   fDelayInSec = 0.1;
+    float                   fGain = 0.5;
+    
+    int blockSize = 512;
+    
+    filterProcess(sInputFilePath, sOutputFilePath1, combFilterType, fDelayInSec, fGain, blockSize);
+    
+    blockSize = 1024;
+    
+    filterProcess(sInputFilePath, sOutputFilePath2, combFilterType, fDelayInSec, fGain, blockSize);
+
+
+    // Check Output - should be scaled
+    float **ppfAudioData1 = 0;
+    float **ppfAudioData2 = 0;
+
+    CAudioFileIf *phAudioFile1 = 0;
+    CAudioFileIf *phAudioFile2 = 0;
+    CAudioFileIf::FileSpec_t stFileSpec;
+    
+    
+    phAudioFile1 -> create(phAudioFile1);
+    phAudioFile1 -> openFile(sOutputFilePath1, CAudioFileIf::kFileRead);
+
+    phAudioFile1 -> getFileSpec(stFileSpec);
+    ppfAudioData1 = new float* [stFileSpec.iNumChannels];
+    
+    phAudioFile2 -> create(phAudioFile2);
+    phAudioFile2 -> openFile(sOutputFilePath2, CAudioFileIf::kFileRead);
+
+    phAudioFile2 -> getFileSpec(stFileSpec);
+    ppfAudioData2 = new float* [stFileSpec.iNumChannels];
+    
+    // allocate array
+    for (int i = 0; i < stFileSpec.iNumChannels; i++)
+    {
+        ppfAudioData1[i] = new float[blockSize];
+        ppfAudioData2[i] = new float[blockSize];
+    }
+
+    while (!phAudioFile1 -> isEof() || !phAudioFile2 -> isEof())
+    {
+        long long iNumFrames = blockSize;
+
+        phAudioFile1 -> readData(ppfAudioData1, iNumFrames);
+        phAudioFile2 -> readData(ppfAudioData2, iNumFrames);
+        
+        // check if outputs are the same
+        for (int i = 0; i < stFileSpec.iNumChannels; i++)
+        {
+            for (int j = 0; j < iNumFrames; j++)
+            {
+                if (ppfAudioData1[i][j] != ppfAudioData2[i][j])
+                {
+                    cout << "Test 3 Failed" << endl;
+                    return;
+                }
+            }
+        }
+    }
+        cout << "Test 3 Passed" << endl;
+
+    // clean-up (close files and free memory)
+    CAudioFileIf::destroy(phAudioFile1);
+    CAudioFileIf::destroy(phAudioFile2);
+
+    for (int i = 0; i < stFileSpec.iNumChannels; i++)
+    {
+        delete[] ppfAudioData1[i];
+        delete[] ppfAudioData2[i];
+    }
+    
+    delete[] ppfAudioData1;
+    delete[] ppfAudioData2;
+    
+    ppfAudioData1 = 0;
+    ppfAudioData2 = 0;
 }
 
 void     showClInfo()
