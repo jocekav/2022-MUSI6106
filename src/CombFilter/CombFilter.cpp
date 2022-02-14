@@ -90,8 +90,8 @@ Error_t CCombFilterFIR::process(float **ppfInputBuffer, float **ppfOutputBuffer,
     {
         for (int j = 0; j < iNumberOfFrames; j++)
         {
-            ppfOutputBuffer[i][j] = ppfInputBuffer[i][j] + CCombFilterBase::m_fGain * CCombFilterBase::m_ppRingBuffer[i]->getPostInc();
             CCombFilterBase::m_ppRingBuffer[i]->putPostInc(ppfInputBuffer[i][j]);
+            ppfOutputBuffer[i][j] = ppfInputBuffer[i][j] + CCombFilterBase::m_fGain * CCombFilterBase::m_ppRingBuffer[i]->getPostInc();
         }
     }
     return Error_t::kNoError;

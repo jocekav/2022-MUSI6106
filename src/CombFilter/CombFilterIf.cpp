@@ -125,8 +125,10 @@ Error_t CCombFilterIf::setParam (FilterParam_t eParam, float fParamValue)
     switch (eParam)
     {
         case kParamDelay:
+            m_fDelayInSec = fParamValue;
             return m_pCCombFilter -> setParam(eParam, fParamValue * m_fSampleRate);
         case kParamGain:
+            m_fGain = fParamValue;
             return m_pCCombFilter -> setParam(eParam, fParamValue);
     }
 
