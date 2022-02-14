@@ -37,8 +37,8 @@ class CCombFilterBase: public CCombFilterIf
 class CCombFilterFIR: public CCombFilterBase
 {
     public:
-//        CCombFilterFIR (int iMaxDelaySamples, int iNumChannels):CCombFilterBase( iMaxDelaySamples, iNumChannels){};
-        CCombFilterFIR (int iMaxDelaySamples, int iNumChannels):CCombFilterBase(){};
+        CCombFilterFIR (int iMaxDelaySamples, int iNumChannels):CCombFilterBase( iMaxDelaySamples, iNumChannels){};
+//        CCombFilterFIR (int iMaxDelaySamples, int iNumChannels):CCombFilterBase(){};
         virtual ~CCombFilterFIR() {};
 
         Error_t process (float **ppfInputBuffer, float **ppfOutputBuffer, int iNumberOfFrames) override;
@@ -47,8 +47,8 @@ class CCombFilterFIR: public CCombFilterBase
 class CCombFilterIIR: public CCombFilterBase
 {
     public:
-//        CCombFilterIIR (int iMaxDelaySamples, int iNumChannels):CCombFilterBase( iMaxDelaySamples, iNumChannels){};
-        CCombFilterIIR (int iMaxDelaySamples, int iNumChannels):CCombFilterBase(){};
+        CCombFilterIIR (int iMaxDelaySamples, int iNumChannels):CCombFilterBase( iMaxDelaySamples, iNumChannels){};
+//        CCombFilterIIR (int iMaxDelaySamples, int iNumChannels):CCombFilterBase(){};
         virtual ~CCombFilterIIR() {};
 
         Error_t process (float **ppfInputBuffer, float **ppfOutputBuffer, int iNumberOfFrames) override;

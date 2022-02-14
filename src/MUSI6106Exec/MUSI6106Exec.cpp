@@ -45,8 +45,8 @@ int main(int argc, char* argv[])
     //////////////////////////////////////////////////////////////////////////////
     // parse command line arguments
     // arguments [input path, filter type, delay time, gain]
-    
-    if (argc < 6 && argc != 1)
+        
+    if (argc < 5 && argc != 1)
     {
         cout << "Missing arguments!";
         return -1;
@@ -76,14 +76,25 @@ int main(int argc, char* argv[])
     //////////////////////////////////////////////////////////////////////////////
     // open the input wave file
     CAudioFileIf::create(phAudioFile);
+    CAudioFileIf::create(phAudioOutputFile);
+    
     phAudioFile->openFile(sInputFilePath, CAudioFileIf::kFileRead);
+    phAudioFile->getFileSpec(stFileSpec);
+    
+    phAudioOutputFile->openFile(sOutputFilePath, CAudioFileIf::kFileWrite, &stFileSpec);
+    
     if (!phAudioFile->isOpen())
     {
         cout << "Wave file open error!";
         CAudioFileIf::destroy(phAudioFile);
         return -1;
     }
-    phAudioFile->getFileSpec(stFileSpec);
+    if (!phAudioOutputFile->isOpen())
+        {
+            cout << "Wave file initialization error!";
+            CAudioFileIf::destroy(phAudioOutputFile);
+            return -1;
+        }
 
     //////////////////////////////////////////////////////////////////////////////
     // initialize the comb filter
@@ -106,18 +117,18 @@ int main(int argc, char* argv[])
     for (int i = 0; i < stFileSpec.iNumChannels; i++)
         ppfAudioOutputData[i] = new float[kBlockSize];
 
-//    if (ppfAudioData == 0)
-//    {
-//        CAudioFileIf::destroy(phAudioFile);
-//        hOutputFile.close();
-//        return -1;
-//    }
-//    if (ppfAudioData[0] == 0)
-//    {
-//        CAudioFileIf::destroy(phAudioFile);
-//        hOutputFile.close();
-//        return -1;
-//    }
+    if (ppfAudioData == 0)
+    {
+        CAudioFileIf::destroy(phAudioFile);
+        return -1;
+    }
+    if (ppfAudioData[0] == 0)
+    {
+        CAudioFileIf::destroy(phAudioFile);
+        return -1;
+    }
+    
+    cout << "memory allocated";
 
     time = clock();
 
