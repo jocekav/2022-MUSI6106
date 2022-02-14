@@ -17,6 +17,7 @@ int     filterProcess(std::string sInputFilePath, std::string sOutputFilePath, C
 void    test1();
 void    test2();
 void    test3(CCombFilterIf::CombFilterType_t combFilterType);
+void    test4(CCombFilterIf::CombFilterType_t combFilterType);
 
 /////////////////////////////////////////////////////////////////////////////////
 // main function
@@ -63,6 +64,12 @@ int main(int argc, char* argv[])
         
         cout << "Test 3 - IIR" << endl;
         test3(CCombFilterIf::CombFilterType_t::kCombIIR);
+        
+        cout << "Test 4 - FIR" << endl;
+        test4(CCombFilterIf::CombFilterType_t::kCombFIR);
+        
+        cout << "Test 4 - IIR" << endl;
+        test4(CCombFilterIf::CombFilterType_t::kCombIIR);
         
         return 0;
         
@@ -457,6 +464,77 @@ void test3(CCombFilterIf::CombFilterType_t combFilterType)
     ppfAudioData1 = 0;
     ppfAudioData2 = 0;
 }
+
+void test4(CCombFilterIf::CombFilterType_t combFilterType)
+{
+    std::string sInputFilePath = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/silence.wav";
+                
+    std::string sOutputFilePath = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/silence_test4.wav";
+    
+    // params for filter
+    float                   fDelayInSec = 0.1;
+    float                   fGain = 0.5;
+    
+    int blockSize = 1024;
+    
+    filterProcess(sInputFilePath, sOutputFilePath, combFilterType, fDelayInSec, fGain, blockSize);
+    
+
+
+    // Check Output - should be scaled
+    float **ppfAudioData = 0;
+
+    CAudioFileIf *phAudioFile = 0;
+    CAudioFileIf::FileSpec_t stFileSpec;
+    
+    
+    phAudioFile -> create(phAudioFile);
+    phAudioFile -> openFile(sOutputFilePath, CAudioFileIf::kFileRead);
+
+    phAudioFile -> getFileSpec(stFileSpec);
+    ppfAudioData = new float* [stFileSpec.iNumChannels];
+
+    // allocate array
+    for (int i = 0; i < stFileSpec.iNumChannels; i++)
+    {
+        ppfAudioData[i] = new float[blockSize];
+    }
+
+    while (!phAudioFile -> isEof())
+    {
+        long long iNumFrames = blockSize;
+
+        phAudioFile -> readData(ppfAudioData, iNumFrames);
+        
+        // check if outputs are the same
+        for (int i = 0; i < stFileSpec.iNumChannels; i++)
+        {
+            for (int j = 0; j < iNumFrames; j++)
+            {
+                if (ppfAudioData[i][j] != 0)
+                {
+                    cout << "Test 4 Failed" << endl;
+                    return;
+                }
+            }
+        }
+    }
+        cout << "Test 4 Passed" << endl;
+
+    // clean-up (close files and free memory)
+    CAudioFileIf::destroy(phAudioFile);
+
+    for (int i = 0; i < stFileSpec.iNumChannels; i++)
+    {
+        delete[] ppfAudioData[i];
+    }
+    
+    delete[] ppfAudioData;
+    
+    ppfAudioData = 0;
+}
+
+
 
 void     showClInfo()
 {
