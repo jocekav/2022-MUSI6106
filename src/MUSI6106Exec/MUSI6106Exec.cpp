@@ -1,6 +1,7 @@
 
 #include <iostream>
 #include <ctime>
+#include <cmath>
 
 #include "MUSI6106Config.h"
 
@@ -12,6 +13,7 @@ using std::endl;
 
 // local function declarations
 void    showClInfo ();
+int     filterProcess(std::string sInputFilePath, std::string sOutputFilePath, CCombFilterIf::CombFilterType_t combFilterType, float fDelayInSec, float fGain, int blockSize);
 
 /////////////////////////////////////////////////////////////////////////////////
 // main function
@@ -70,8 +72,31 @@ int main(int argc, char* argv[])
         
         fDelayInSec = atof(argv[3]);
         fGain = atof(argv[4]);
-        
     }
+    // run filtering
+    return filterProcess(sInputFilePath, sOutputFilePath, combFilterType, fDelayInSec, fGain, kBlockSize);
+}
+
+int filterProcess(std::string sInputFilePath, std::string sOutputFilePath, CCombFilterIf::CombFilterType_t combFilterType, float fDelayInSec, float fGain, int blockSize)
+{
+
+    static const int kBlockSize = blockSize;
+
+    clock_t time = 0;
+
+    float **ppfAudioData = 0;
+    float **ppfAudioOutputData = 0;
+
+    CAudioFileIf *phAudioFile = 0;
+    CAudioFileIf *phAudioOutputFile = 0;
+    CAudioFileIf::FileSpec_t stFileSpec;
+    
+    CCombFilterIf           *phCombFilter = 0;
+    
+    // params for filter
+    float                   fMaxDelayInS = 1;
+
+    showClInfo();
 
     //////////////////////////////////////////////////////////////////////////////
     // open the input wave file
@@ -176,6 +201,10 @@ int main(int argc, char* argv[])
 
 }
 
+void test1()
+{
+    
+}
 
 void     showClInfo()
 {
