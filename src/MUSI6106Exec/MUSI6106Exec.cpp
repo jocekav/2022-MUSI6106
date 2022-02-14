@@ -245,13 +245,12 @@ void test1()
 
     while (!phAudioOutputFile -> isEof())
     {
-        long long iNumFrames = blockSize; //number of frames to read at a time
-        //read in 1024 frames
-        //store in ppfOutput
+        long long iNumFrames = blockSize;
+
         phAudioOutputFile -> readData(ppfAudioOutputData, iNumFrames);
         
         // check if output is 0
-        for (int i = 0; i < stFileSpec.iNumChannels; i++) //compare the two arrays
+        for (int i = 0; i < stFileSpec.iNumChannels; i++)
         {
             for (int j = 0; j < iNumFrames; j++)
             {
@@ -277,6 +276,7 @@ void test1()
     
     ppfAudioOutputData = 0;
 
+
 }
 
 void test2()
@@ -290,10 +290,78 @@ void test2()
     CCombFilterIf::CombFilterType_t combFilterType = CCombFilterIf::CombFilterType_t::kCombIIR;
     
     // params for filter
-    float                   fDelayInSec = 0.5;
-    float                   fGain = 1;
+    float                   fDelayInSec = 0.1;
+    float                   fGain = 0.5;
     
     filterProcess(sInputFilePath, sOutputFilePath, combFilterType, fDelayInSec, fGain, blockSize);
+
+
+    // Check Output - should be scaled
+    float **ppfAudioData = 0;
+    float **ppfAudioOutputData = 0;
+
+    CAudioFileIf *phAudioFile = 0;
+    CAudioFileIf *phAudioOutputFile = 0;
+    CAudioFileIf::FileSpec_t stFileSpec;
+    
+    
+    phAudioOutputFile -> create(phAudioOutputFile);
+    phAudioOutputFile -> openFile(sOutputFilePath, CAudioFileIf::kFileRead);
+
+    phAudioOutputFile -> getFileSpec(stFileSpec);
+    ppfAudioOutputData = new float* [stFileSpec.iNumChannels];
+    
+    phAudioFile -> create(phAudioFile);
+    phAudioFile -> openFile(sInputFilePath, CAudioFileIf::kFileRead);
+
+    phAudioFile -> getFileSpec(stFileSpec);
+    ppfAudioData = new float* [stFileSpec.iNumChannels];
+    
+    // allocate array
+    for (int i = 0; i < stFileSpec.iNumChannels; i++)
+    {
+        ppfAudioOutputData[i] = new float[blockSize];
+        ppfAudioData[i] = new float[blockSize];
+    }
+
+    while (!phAudioOutputFile -> isEof() || !phAudioFile -> isEof())
+    {
+        long long iNumFrames = blockSize;
+
+        phAudioOutputFile -> readData(ppfAudioOutputData, iNumFrames);
+        phAudioFile -> readData(ppfAudioData, iNumFrames);
+        
+        // check if output is scaled
+        int skipDelayLine = int(fDelayInSec * stFileSpec.fSampleRateInHz / iNumFrames);
+        for (int i = 0; i < stFileSpec.iNumChannels; i++)
+        {
+            for (int j = skipDelayLine; j < iNumFrames; j++)
+            {
+                if (ppfAudioData[i][j] != 0 && (abs(ppfAudioOutputData[i][j]) <= abs(ppfAudioData[i][j])))
+                {
+                    cout << "Test 2 Failed" << endl;
+                    return;
+                }
+            }
+        }
+    }
+        cout << "Test 2 Passed" << endl;
+
+    // clean-up (close files and free memory)
+    CAudioFileIf::destroy(phAudioFile);
+    CAudioFileIf::destroy(phAudioOutputFile);
+
+    for (int i = 0; i < stFileSpec.iNumChannels; i++)
+    {
+        delete[] ppfAudioData[i];
+        delete[] ppfAudioOutputData[i];
+    }
+    
+    delete[] ppfAudioData;
+    delete[] ppfAudioOutputData;
+    
+    ppfAudioData = 0;
+    ppfAudioOutputData = 0;
 }
 
 void     showClInfo()
