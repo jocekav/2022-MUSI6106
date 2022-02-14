@@ -76,6 +76,13 @@ Error_t CCombFilterIf::destroy (CCombFilterIf*& pCCombFilter)
 Error_t CCombFilterIf::init (CombFilterType_t eFilterType, float fMaxDelayLengthInS, float fSampleRateInHz, int iNumChannels)
 {
     reset();
+    
+    if (fMaxDelayLengthInS <= 0 ||
+            fSampleRateInHz <= 0 ||
+            iNumChannels <= 0)
+    {
+        return Error_t::kFunctionInvalidArgsError;
+    }
 
     m_eFilterType = eFilterType;
     m_fMaxDelayLengthInS = fMaxDelayLengthInS;
@@ -116,12 +123,21 @@ Error_t CCombFilterIf::reset ()
 
 Error_t CCombFilterIf::process (float **ppfInputBuffer, float **ppfOutputBuffer, int iNumberOfFrames)
 {
-
+    if (!m_bIsInitialized)
+    {
+        return Error_t::kNotInitializedError;
+    }
+    
     return m_pCCombFilter -> process(ppfInputBuffer, ppfOutputBuffer, iNumberOfFrames);
 }
 
 Error_t CCombFilterIf::setParam (FilterParam_t eParam, float fParamValue)
 {
+    if (!m_bIsInitialized)
+    {
+        return Error_t::kNotInitializedError;
+    }
+    
     switch (eParam)
     {
         case kParamDelay:
@@ -137,6 +153,11 @@ Error_t CCombFilterIf::setParam (FilterParam_t eParam, float fParamValue)
 
 float CCombFilterIf::getParam (FilterParam_t eParam) const
 {
+    if (!m_bIsInitialized)
+    {
+        return -1;
+    }
+    
     switch (eParam)
     {
         case kParamDelay:
