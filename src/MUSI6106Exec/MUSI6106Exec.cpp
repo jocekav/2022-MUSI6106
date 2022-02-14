@@ -14,6 +14,8 @@ using std::endl;
 // local function declarations
 void    showClInfo ();
 int     filterProcess(std::string sInputFilePath, std::string sOutputFilePath, CCombFilterIf::CombFilterType_t combFilterType, float fDelayInSec, float fGain, int blockSize);
+void    realAudio1();
+void    realAudio2();
 void    test1();
 void    test2();
 void    test3(CCombFilterIf::CombFilterType_t combFilterType);
@@ -54,6 +56,9 @@ int main(int argc, char* argv[])
     // arguments [input path, filter type, delay time, gain]
     if (argc == 1)
     {
+//        realAudio1();
+//        realAudio2();
+        
         cout << "Test 1" << endl;
         test1();
         
@@ -229,6 +234,40 @@ int filterProcess(std::string sInputFilePath, std::string sOutputFilePath, CComb
 
 }
 
+void realAudio1()
+{
+    std::string sInputFilePath = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/bagpipe.wav";
+                
+    std::string sOutputFilePath = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/bagpipe_FIR.wav";
+
+    int blockSize = 1024;
+    
+    CCombFilterIf::CombFilterType_t combFilterType = CCombFilterIf::CombFilterType_t::kCombFIR;
+    
+    // params for filter
+    float                   fDelayInSec = 10 / 22000;
+    float                   fGain = 0.5;
+    
+    filterProcess(sInputFilePath, sOutputFilePath, combFilterType, fDelayInSec, fGain, blockSize);
+}
+
+void realAudio2()
+{
+    std::string sInputFilePath = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/acomic.wav";
+                
+    std::string sOutputFilePath = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/acomic_IIR.wav";
+
+    int blockSize = 1024;
+    
+    CCombFilterIf::CombFilterType_t combFilterType = CCombFilterIf::CombFilterType_t::kCombIIR;
+    
+    // params for filter
+    float                   fDelayInSec = 10 / 22000;
+    float                   fGain = 0.5;
+    
+    filterProcess(sInputFilePath, sOutputFilePath, combFilterType, fDelayInSec, fGain, blockSize);
+}
+
 void test1()
 {
     std::string sInputFilePath = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/sine440.wav";
@@ -311,8 +350,8 @@ void test2()
     CCombFilterIf::CombFilterType_t combFilterType = CCombFilterIf::CombFilterType_t::kCombIIR;
     
     // params for filter
-    float                   fDelayInSec = 0.1;
-    float                   fGain = 0.5;
+    float                   fDelayInSec = 1;
+    float                   fGain = -1;
     
     filterProcess(sInputFilePath, sOutputFilePath, combFilterType, fDelayInSec, fGain, blockSize);
 
@@ -353,12 +392,12 @@ void test2()
         phAudioFile -> readData(ppfAudioData, iNumFrames);
         
         // check if output is scaled
-        int skipDelayLine = int(fDelayInSec * stFileSpec.fSampleRateInHz / iNumFrames);
+        float fScalingFactor = 1/(1-fGain);
         for (int i = 0; i < stFileSpec.iNumChannels; i++)
         {
-            for (int j = skipDelayLine; j < iNumFrames; j++)
+            for (int j = 0; j < iNumFrames; j++)
             {
-                if (ppfAudioData[i][j] != 0 && (abs(ppfAudioOutputData[i][j]) <= abs(ppfAudioData[i][j])))
+                if (ppfAudioOutputData[i][j] - (fScalingFactor * ppfAudioData[i][j]) !=0)
                 {
                     cout << "Test 2 Failed" << endl;
                     return;
