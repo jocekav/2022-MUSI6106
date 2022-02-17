@@ -96,11 +96,35 @@ public:
     }
 
     /*! return the value at the current read index
+    \param fOffset: read at offset from read index
     \return float the value from the read index
     */
-    T get() const
+    T get(float fOffset = 0) const
     {
-        return m_ptBuff[m_iReadIdx];
+        if (fOffset == 0)
+        {
+            return m_ptBuff[m_iReadIdx];
+        }
+        
+        int iRoundIdx;
+        int iOffsetIdx;
+        if (fOffset > m_iReadIdx)
+        {
+            iRoundIdx = ceil(fOffset);
+            if (fOffset - iRoundIdx == 0)
+            {
+                iOffsetIdx = (m_iReadIdx + fOffset) % m_iBuffLength;
+                return m_ptBuff[iOffsetIdx];
+            } else
+            {
+                iOffsetIdx = (m_iReadIdx + iRoundIdx) % m_iBuffLength;
+                float fIntp = m_ptBuff[m_iReadIdx] - (fOffset - m_iReadIdx) * (m_ptBuff[iOffsetIdx] - m_ptBuff[m_iReadIdx]) / (iRoundIdx - m_iReadIdx);
+                return fIntp;
+            }
+        } else if (fOffset < m_iReadIdx)
+        {
+            return;
+        }
     }
     
     /*! set buffer content and indices to 0
