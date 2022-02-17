@@ -81,7 +81,7 @@ Error_t CCombFilterBase::init(int iMaxDelaySamples, int iNumChannels)
     {
         m_ppRingBuffer[i] = new CRingBuffer<float>(iMaxDelaySamples);
     }
-
+    return Error_t::kNoError;
 }
 
 Error_t CCombFilterFIR::process(float **ppfInputBuffer, float **ppfOutputBuffer, int iNumberOfFrames) 
