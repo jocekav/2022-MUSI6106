@@ -2,6 +2,7 @@
 #include <iostream>
 #include <ctime>
 #include <cmath>
+# include <assert.h>
 
 #include "MUSI6106Config.h"
 
@@ -271,9 +272,9 @@ void realAudio2()
 
 void test1()
 {
-    std::string sInputFilePath = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/sine440.wav";
+    std::string sInputFilePath = "../../sine440.wav";
                 
-    std::string sOutputFilePath = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/sine440_test1.wav";
+    std::string sOutputFilePath = "../../sine440_test1.wav";
 
     int blockSize = 1024;
     
@@ -342,9 +343,9 @@ void test1()
 
 void test2()
 {
-    std::string sInputFilePath = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/sine440.wav";
+    std::string sInputFilePath = "../../sine440.wav";
                 
-    std::string sOutputFilePath = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/sine440_test2.wav";
+    std::string sOutputFilePath = "../../sine440_test2.wav";
 
     int blockSize = 1024;
     
@@ -431,10 +432,10 @@ void test2()
 
 void test3(CCombFilterIf::CombFilterType_t combFilterType)
 {
-    std::string sInputFilePath = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/sine440.wav";
+    std::string sInputFilePath = "../../sine440.wav";
                 
-    std::string sOutputFilePath1 = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/sine440_test3_1.wav";
-    std::string sOutputFilePath2 = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/sine440_test3_2.wav";
+    std::string sOutputFilePath1 = "../../sine440_test3_1.wav";
+    std::string sOutputFilePath2 = "../../sine440_test3_2.wav";
     
     // params for filter
     float                   fDelayInSec = 0.1;
@@ -518,9 +519,9 @@ void test3(CCombFilterIf::CombFilterType_t combFilterType)
 
 void test4(CCombFilterIf::CombFilterType_t combFilterType)
 {
-    std::string sInputFilePath = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/silence.wav";
+    std::string sInputFilePath = "../../silence.wav";
                 
-    std::string sOutputFilePath = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/silence_test4.wav";
+    std::string sOutputFilePath = "../../silence_test4.wav";
     
     // params for filter
     float                   fDelayInSec = 0.1;
@@ -588,9 +589,9 @@ void test4(CCombFilterIf::CombFilterType_t combFilterType)
 // check if filter params are 0 - output should equal input
 void test5(CCombFilterIf::CombFilterType_t combFilterType)
 {
-    std::string sInputFilePath = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/sine440.wav";
+    std::string sInputFilePath = "../../sine440.wav";
                 
-    std::string sOutputFilePath = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/sine440_test5.wav";
+    std::string sOutputFilePath = "../../sine440_test5.wav";
 
     int blockSize = 1024;
     
