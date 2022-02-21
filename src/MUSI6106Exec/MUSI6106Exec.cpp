@@ -56,8 +56,8 @@ int main(int argc, char* argv[])
     // arguments [input path, filter type, delay time, gain]
     if (argc == 1)
     {
-//        realAudio1();
-//        realAudio2();
+        realAudio1();
+        realAudio2();
         
         cout << "Test 1" << endl;
         test1();
@@ -245,10 +245,11 @@ void realAudio1()
     CCombFilterIf::CombFilterType_t combFilterType = CCombFilterIf::CombFilterType_t::kCombFIR;
     
     // params for filter
-    float                   fDelayInSec = 10 / 22000;
+    float                   fDelayInSec = 100 / 22000;
     float                   fGain = 0.5;
     
     filterProcess(sInputFilePath, sOutputFilePath, combFilterType, fDelayInSec, fGain, blockSize);
+    
 }
 
 void realAudio2()
@@ -262,7 +263,7 @@ void realAudio2()
     CCombFilterIf::CombFilterType_t combFilterType = CCombFilterIf::CombFilterType_t::kCombIIR;
     
     // params for filter
-    float                   fDelayInSec = 10 / 22000;
+    float                   fDelayInSec = 100 / 22000;
     float                   fGain = 0.5;
     
     filterProcess(sInputFilePath, sOutputFilePath, combFilterType, fDelayInSec, fGain, blockSize);
@@ -350,8 +351,9 @@ void test2()
     CCombFilterIf::CombFilterType_t combFilterType = CCombFilterIf::CombFilterType_t::kCombIIR;
     
     // params for filter
-    float                   fDelayInSec = 1;
-    float                   fGain = -1;
+    float                   fFreq = 440;
+    float                   fDelayInSec = 1 / fFreq;
+    float                   fGain = 1;
     
     filterProcess(sInputFilePath, sOutputFilePath, combFilterType, fDelayInSec, fGain, blockSize);
 
@@ -392,15 +394,18 @@ void test2()
         phAudioFile -> readData(ppfAudioData, iNumFrames);
         
         // check if output is scaled
-        float fScalingFactor = 1/(1-fGain);
+//        float fScalingFactor = 1/(1-fGain);
         for (int i = 0; i < stFileSpec.iNumChannels; i++)
         {
             for (int j = 0; j < iNumFrames; j++)
             {
-                if (ppfAudioOutputData[i][j] - (fScalingFactor * ppfAudioData[i][j]) !=0)
+                if (j >= fDelayInSec * stFileSpec.fSampleRateInHz)
                 {
-                    cout << "Test 2 Failed" << endl;
-                    return;
+                    if (ppfAudioOutputData[i][j] <= ppfAudioData[i][j])
+                    {
+                        cout << "Test 2 Failed" << endl;
+                        return;
+                    }
                 }
             }
         }

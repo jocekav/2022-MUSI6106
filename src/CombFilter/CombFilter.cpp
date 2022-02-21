@@ -51,8 +51,8 @@ Error_t CCombFilterBase::setParam(FilterParam_t eParam, float fParamValue)
             CCombFilterBase::m_iDelayTimeSamples = fParamValue;
             for (int i = 0; i < m_iNumChannels; i++)
             {
-                m_ppRingBuffer[i] -> setWriteIdx((int)fParamValue);
-                m_ppRingBuffer[i] -> setReadIdx(0);
+                m_ppRingBuffer[i] -> setWriteIdx((int)fParamValue + m_ppRingBuffer[i]->getReadIdx());
+//                m_ppRingBuffer[i] -> setReadIdx(0);
             }
         case kParamGain:
             CCombFilterBase::m_fGain = fParamValue;

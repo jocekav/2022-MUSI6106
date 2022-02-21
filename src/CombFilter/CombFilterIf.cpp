@@ -141,6 +141,10 @@ Error_t CCombFilterIf::setParam (FilterParam_t eParam, float fParamValue)
     switch (eParam)
     {
         case kParamDelay:
+            if (fParamValue < 0 || fParamValue > m_fMaxDelayLengthInS)
+            {
+                return Error_t::kFunctionInvalidArgsError;
+            }
             m_fDelayInSec = fParamValue;
             return m_pCCombFilter -> setParam(eParam, fParamValue * m_fSampleRate);
         case kParamGain:
