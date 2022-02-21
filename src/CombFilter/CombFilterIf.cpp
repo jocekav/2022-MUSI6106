@@ -111,6 +111,9 @@ Error_t CCombFilterIf::init (CombFilterType_t eFilterType, float fMaxDelayLength
 Error_t CCombFilterIf::reset ()
 {
 
+    delete m_pCCombFilter;
+    m_pCCombFilter      = 0;
+    
     m_fMaxDelayLengthInS = 0;
     m_fSampleRate = 0;
     m_iNumChannels = 0;

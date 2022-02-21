@@ -148,6 +148,7 @@ int filterProcess(std::string sInputFilePath, std::string sOutputFilePath, CComb
     if (!phAudioFile->isOpen())
     {
         cout << "Wave file open error!";
+        CAudioFileIf::destroy(phAudioOutputFile);
         CAudioFileIf::destroy(phAudioFile);
         return -1;
     }
@@ -155,6 +156,7 @@ int filterProcess(std::string sInputFilePath, std::string sOutputFilePath, CComb
         {
             cout << "Wave file initialization error!";
             CAudioFileIf::destroy(phAudioOutputFile);
+            CAudioFileIf::destroy(phAudioFile);
             return -1;
         }
 
@@ -182,11 +184,45 @@ int filterProcess(std::string sInputFilePath, std::string sOutputFilePath, CComb
     if (ppfAudioData == 0)
     {
         CAudioFileIf::destroy(phAudioFile);
+        
+        CAudioFileIf::destroy(phAudioFile);
+        CAudioFileIf::destroy(phAudioOutputFile);
+        CCombFilterIf::destroy(phCombFilter);
+
+        for (int i = 0; i < stFileSpec.iNumChannels; i++)
+        {
+            delete[] ppfAudioData[i];
+            delete[] ppfAudioOutputData[i];
+        }
+        
+        delete[] ppfAudioData;
+        delete[] ppfAudioOutputData;
+        
+        ppfAudioData = 0;
+        ppfAudioOutputData = 0;
+        
         return -1;
     }
     if (ppfAudioData[0] == 0)
     {
         CAudioFileIf::destroy(phAudioFile);
+        
+        CAudioFileIf::destroy(phAudioFile);
+        CAudioFileIf::destroy(phAudioOutputFile);
+        CCombFilterIf::destroy(phCombFilter);
+
+        for (int i = 0; i < stFileSpec.iNumChannels; i++)
+        {
+            delete[] ppfAudioData[i];
+            delete[] ppfAudioOutputData[i];
+        }
+        
+        delete[] ppfAudioData;
+        delete[] ppfAudioOutputData;
+        
+        ppfAudioData = 0;
+        ppfAudioOutputData = 0;
+        
         return -1;
     }
 
@@ -237,16 +273,18 @@ int filterProcess(std::string sInputFilePath, std::string sOutputFilePath, CComb
 
 void realAudio1()
 {
-    std::string sInputFilePath = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/bagpipe.wav";
+    std::string sInputFilePath = "../../audio/bagpipe.wav";
                 
-    std::string sOutputFilePath = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/bagpipe_FIR.wav";
+    std::string sOutputFilePath = "../../audio/bagpipe_FIR.wav";
 
     int blockSize = 1024;
+    
+    int samplingRate = 22000;
     
     CCombFilterIf::CombFilterType_t combFilterType = CCombFilterIf::CombFilterType_t::kCombFIR;
     
     // params for filter
-    float                   fDelayInSec = 100 / 22000;
+    float                   fDelayInSec = 100 / samplingRate;
     float                   fGain = 0.5;
     
     filterProcess(sInputFilePath, sOutputFilePath, combFilterType, fDelayInSec, fGain, blockSize);
@@ -255,16 +293,18 @@ void realAudio1()
 
 void realAudio2()
 {
-    std::string sInputFilePath = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/acomic.wav";
+    std::string sInputFilePath = "../../audio/acomic.wav";
                 
-    std::string sOutputFilePath = "/Users/jocekav/Documents/GitHub/2022-MUSI6106/acomic_IIR.wav";
+    std::string sOutputFilePath = "../../audio/acomic_IIR.wav";
 
     int blockSize = 1024;
+    
+    int samplingRate = 22000;
     
     CCombFilterIf::CombFilterType_t combFilterType = CCombFilterIf::CombFilterType_t::kCombIIR;
     
     // params for filter
-    float                   fDelayInSec = 100 / 22000;
+    float                   fDelayInSec = 100 / samplingRate;
     float                   fGain = 0.5;
     
     filterProcess(sInputFilePath, sOutputFilePath, combFilterType, fDelayInSec, fGain, blockSize);
@@ -272,9 +312,9 @@ void realAudio2()
 
 void test1()
 {
-    std::string sInputFilePath = "../../sine440.wav";
+    std::string sInputFilePath = "../../audio/sine440.wav";
                 
-    std::string sOutputFilePath = "../../sine440_test1.wav";
+    std::string sOutputFilePath = "../../audio/sine440_test1.wav";
 
     int blockSize = 1024;
     
@@ -319,6 +359,19 @@ void test1()
                 if (ppfAudioOutputData[i][j] != 0)
                 {
                     cout << "Test 1 Failed" << endl;
+                    
+                    // clean-up (close files and free memory)
+                    CAudioFileIf::destroy(phAudioOutputFile);
+
+                    for (int i = 0; i < stFileSpec.iNumChannels; i++)
+                    {
+                        delete[] ppfAudioOutputData[i];
+                    }
+                    
+                    delete[] ppfAudioOutputData;
+                    
+                    ppfAudioOutputData = 0;
+                    
                     return;
                 }
             }
@@ -343,19 +396,19 @@ void test1()
 
 void test2()
 {
-    std::string sInputFilePath = "../../sine440.wav";
-                
-    std::string sOutputFilePath = "../../sine440_test2.wav";
+    std::string sInputFilePath = "../../audio/sine440.wav";
+
+    std::string sOutputFilePath = "../../audio/sine440_test2.wav";
 
     int blockSize = 1024;
-    
+
     CCombFilterIf::CombFilterType_t combFilterType = CCombFilterIf::CombFilterType_t::kCombIIR;
-    
+
     // params for filter
     float                   fFreq = 440;
     float                   fDelayInSec = 1 / fFreq;
     float                   fGain = 1;
-    
+
     filterProcess(sInputFilePath, sOutputFilePath, combFilterType, fDelayInSec, fGain, blockSize);
 
 
@@ -366,26 +419,32 @@ void test2()
     CAudioFileIf *phAudioFile = 0;
     CAudioFileIf *phAudioOutputFile = 0;
     CAudioFileIf::FileSpec_t stFileSpec;
-    
-    
+
+
     phAudioOutputFile -> create(phAudioOutputFile);
     phAudioOutputFile -> openFile(sOutputFilePath, CAudioFileIf::kFileRead);
 
     phAudioOutputFile -> getFileSpec(stFileSpec);
     ppfAudioOutputData = new float* [stFileSpec.iNumChannels];
-    
+
     phAudioFile -> create(phAudioFile);
     phAudioFile -> openFile(sInputFilePath, CAudioFileIf::kFileRead);
+    
+    long long iLengthInFrames = 0;
+    phAudioFile -> getLength(iLengthInFrames);
 
     phAudioFile -> getFileSpec(stFileSpec);
     ppfAudioData = new float* [stFileSpec.iNumChannels];
-    
+
     // allocate array
     for (int i = 0; i < stFileSpec.iNumChannels; i++)
     {
         ppfAudioOutputData[i] = new float[blockSize];
         ppfAudioData[i] = new float[blockSize];
     }
+    
+    int         iSamplingRate = stFileSpec.fSampleRateInHz;
+    int         iCycleInSamples = int(iSamplingRate / fFreq);
 
     while (!phAudioOutputFile -> isEof() || !phAudioFile -> isEof())
     {
@@ -393,24 +452,44 @@ void test2()
 
         phAudioOutputFile -> readData(ppfAudioOutputData, iNumFrames);
         phAudioFile -> readData(ppfAudioData, iNumFrames);
-        
-        // check if output is scaled
-//        float fScalingFactor = 1/(1-fGain);
+
         for (int i = 0; i < stFileSpec.iNumChannels; i++)
         {
-            for (int j = 0; j < iNumFrames; j++)
+            float fCurrGain = 1;
+            for (int j = iCycleInSamples + 1; j < iLengthInFrames; j++)
             {
-                if (j >= fDelayInSec * stFileSpec.fSampleRateInHz)
+                if (ppfAudioData[i][j] != 0)
                 {
-                    if (ppfAudioOutputData[i][j] <= ppfAudioData[i][j])
+                    if (abs(ppfAudioOutputData[i][j] / ppfAudioData[i][j]) - fCurrGain < 1)
                     {
+                        fCurrGain = abs(ppfAudioOutputData[i][j] / ppfAudioData[i][j]);
+                        
                         cout << "Test 2 Failed" << endl;
+                        
+                        // clean-up (close files and free memory)
+                        CAudioFileIf::destroy(phAudioFile);
+                        CAudioFileIf::destroy(phAudioOutputFile);
+
+                        for (int i = 0; i < stFileSpec.iNumChannels; i++)
+                        {
+                            delete[] ppfAudioData[i];
+                            delete[] ppfAudioOutputData[i];
+                        }
+
+                        delete[] ppfAudioData;
+                        delete[] ppfAudioOutputData;
+
+                        ppfAudioData = 0;
+                        ppfAudioOutputData = 0;
+                        
                         return;
                     }
+                    fCurrGain = abs(ppfAudioOutputData[i][j] / ppfAudioData[i][j]);
                 }
             }
         }
     }
+    
         cout << "Test 2 Passed" << endl;
 
     // clean-up (close files and free memory)
@@ -422,20 +501,21 @@ void test2()
         delete[] ppfAudioData[i];
         delete[] ppfAudioOutputData[i];
     }
-    
+
     delete[] ppfAudioData;
     delete[] ppfAudioOutputData;
-    
+
     ppfAudioData = 0;
     ppfAudioOutputData = 0;
 }
 
+
 void test3(CCombFilterIf::CombFilterType_t combFilterType)
 {
-    std::string sInputFilePath = "../../sine440.wav";
+    std::string sInputFilePath = "../../audio/sine440.wav";
                 
-    std::string sOutputFilePath1 = "../../sine440_test3_1.wav";
-    std::string sOutputFilePath2 = "../../sine440_test3_2.wav";
+    std::string sOutputFilePath1 = "../../audio/sine440_test3_1.wav";
+    std::string sOutputFilePath2 = "../../audio/sine440_test3_2.wav";
     
     // params for filter
     float                   fDelayInSec = 0.1;
@@ -493,6 +573,23 @@ void test3(CCombFilterIf::CombFilterType_t combFilterType)
                 if (ppfAudioData1[i][j] != ppfAudioData2[i][j])
                 {
                     cout << "Test 3 Failed" << endl;
+                    
+                    // clean-up (close files and free memory)
+                    CAudioFileIf::destroy(phAudioFile1);
+                    CAudioFileIf::destroy(phAudioFile2);
+
+                    for (int i = 0; i < stFileSpec.iNumChannels; i++)
+                    {
+                        delete[] ppfAudioData1[i];
+                        delete[] ppfAudioData2[i];
+                    }
+                    
+                    delete[] ppfAudioData1;
+                    delete[] ppfAudioData2;
+                    
+                    ppfAudioData1 = 0;
+                    ppfAudioData2 = 0;
+                    
                     return;
                 }
             }
@@ -519,9 +616,9 @@ void test3(CCombFilterIf::CombFilterType_t combFilterType)
 
 void test4(CCombFilterIf::CombFilterType_t combFilterType)
 {
-    std::string sInputFilePath = "../../silence.wav";
+    std::string sInputFilePath = "../../audio/silence.wav";
                 
-    std::string sOutputFilePath = "../../silence_test4.wav";
+    std::string sOutputFilePath = "../../audio/silence_test4.wav";
     
     // params for filter
     float                   fDelayInSec = 0.1;
@@ -566,6 +663,19 @@ void test4(CCombFilterIf::CombFilterType_t combFilterType)
                 if (ppfAudioData[i][j] != 0)
                 {
                     cout << "Test 4 Failed" << endl;
+                    
+                    // clean-up (close files and free memory)
+                    CAudioFileIf::destroy(phAudioFile);
+
+                    for (int i = 0; i < stFileSpec.iNumChannels; i++)
+                    {
+                        delete[] ppfAudioData[i];
+                    }
+                    
+                    delete[] ppfAudioData;
+                    
+                    ppfAudioData = 0;
+                    
                     return;
                 }
             }
@@ -589,9 +699,9 @@ void test4(CCombFilterIf::CombFilterType_t combFilterType)
 // check if filter params are 0 - output should equal input
 void test5(CCombFilterIf::CombFilterType_t combFilterType)
 {
-    std::string sInputFilePath = "../../sine440.wav";
+    std::string sInputFilePath = "../../audio/sine440.wav";
                 
-    std::string sOutputFilePath = "../../sine440_test5.wav";
+    std::string sOutputFilePath = "../../audio/sine440_test5.wav";
 
     int blockSize = 1024;
     
@@ -646,6 +756,23 @@ void test5(CCombFilterIf::CombFilterType_t combFilterType)
                 if (ppfAudioOutputData[i][j] != ppfAudioData[i][j])
                 {
                     cout << "Test 5 Failed" << endl;
+                    
+                    // clean-up (close files and free memory)
+                    CAudioFileIf::destroy(phAudioFile);
+                    CAudioFileIf::destroy(phAudioOutputFile);
+
+                    for (int i = 0; i < stFileSpec.iNumChannels; i++)
+                    {
+                        delete[] ppfAudioData[i];
+                        delete[] ppfAudioOutputData[i];
+                    }
+                    
+                    delete[] ppfAudioData;
+                    delete[] ppfAudioOutputData;
+                    
+                    ppfAudioData = 0;
+                    ppfAudioOutputData = 0;
+                    
                     return;
                 }
             }
