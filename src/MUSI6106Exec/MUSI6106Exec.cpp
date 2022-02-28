@@ -5,6 +5,8 @@
 #include "MUSI6106Config.h"
 
 #include "AudioFileIf.h"
+#include "Fft.h"
+#include "RingBuffer.h"
 
 using std::cout;
 using std::endl;
@@ -30,6 +32,10 @@ int main(int argc, char* argv[])
     CAudioFileIf::FileSpec_t stFileSpec;
 
     showClInfo();
+    
+    CFft* pFft = 0;
+    CRingBuffer* pInRingBuff = 0;
+    
 
     //////////////////////////////////////////////////////////////////////////////
     // parse command line arguments
@@ -125,6 +131,11 @@ int main(int argc, char* argv[])
     // all done
     return 0;
 
+}
+
+void fftOnBlock(Cfft* pFft, CRingBuffer* pRingInBuff, )
+{
+    doFft (complex_t *pfSpectrum, const float *pfInput);
 }
 
 
